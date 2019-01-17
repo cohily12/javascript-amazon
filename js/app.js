@@ -13,7 +13,7 @@ const musicCarousel = new Carousel({
     delayTime: 5000 
 })
 
-window.addEventListener("load", () => {
+window.addEventListener("DOMContentLoaded", () => {
     stickyLayer.run();
     videoCarousel.run();
     musicCarousel.run();
