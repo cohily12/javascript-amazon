@@ -1,9 +1,19 @@
+<<<<<<< HEAD
+=======
+import { $, $All} from "../util.js";
+
+>>>>>>> 5889a2eeaef34772bd574a413556cd40058f33b0
 class StickyLayer{
-    constructor({ stickyEl }){
-        this.stickyEl = stickyEl;
+    constructor( bindTo ){
+        this.stickyEl = $(bindTo);
     }
 
+<<<<<<< HEAD
     pinElement({ thresholdEl }){
+=======
+    pinElement( selector ){
+        const thresholdEl = $(selector);
+>>>>>>> 5889a2eeaef34772bd574a413556cd40058f33b0
         let bPinEl = false;
 
         return _ => {
@@ -23,8 +33,14 @@ class StickyLayer{
         }
     }
 
+<<<<<<< HEAD
     displayHiddenBar({ thresholdEl }){
         const hiddenBar = this.stickyEl.querySelector(".nav-hidden-bar");
+=======
+    displayHiddenBar( selector ){
+        const thresholdEl = $(selector);
+        const hiddenBar = $(".hidden-bar", this.stickyEl);
+>>>>>>> 5889a2eeaef34772bd574a413556cd40058f33b0
         let bHiddenbar = false;
 
         return _ => {
@@ -45,6 +61,7 @@ class StickyLayer{
     }
 
     displayHiddenPlan(){
+<<<<<<< HEAD
         const seeMoreBtn = this.stickyEl.querySelector(".bar-see-more .down-arrow");
         const contentCloseBtn = this.stickyEl.querySelectorAll("#content-close-btn");
         
@@ -55,6 +72,30 @@ class StickyLayer{
         contentCloseBtn.forEach(el => el.addEventListener("click", () => {
             this.toggleHiddenEl();
         }));
+=======
+        const seeMoreBtn = $(".bar-see-more .down-arrow", this.stickyEl);
+        const contentCloseBtn = $All("#content-close-btn", this.stickyEl);
+        
+        seeMoreBtn.addEventListener("click", this.toggleHiddenEl);
+
+        contentCloseBtn.forEach(el => el.addEventListener("click", this.toggleHiddenEl));
+    }
+
+    toggleHiddenEl(){
+        const hiddenBar = $(".hidden-bar", this.stickyEl);
+        const hiddenPlan = $(".hidden-plan", this.stickyEl);
+        const hiddenClose = $(".hidden-close", this.stickyEl);
+
+        hiddenBar.classList.toggle("hidden");
+        hiddenPlan.classList.toggle("visible");
+        hiddenClose.classList.toggle("visible");
+    }
+
+    run() {
+        window.addEventListener("scroll", this.pinElement(".nav-lower"));
+        window.addEventListener("scroll", this.displayHiddenBar(".prime-header-content .btn-prime-container"));
+        this.displayHiddenPlan();
+>>>>>>> 5889a2eeaef34772bd574a413556cd40058f33b0
     }
 
     toggleHiddenEl(){
