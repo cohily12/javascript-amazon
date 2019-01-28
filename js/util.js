@@ -18,7 +18,7 @@ export function debounce(callback, delay) {
 
 export const network = {
     async get(url) {
-        const res = await fetch(url);
+        const res = await fetch(url, {mode: "cors"});
 
         if(res.status === 200) return res.json();                 
         return res;
