@@ -19,10 +19,13 @@ const template = {
 
         return jsonData => {
             const carouselHTML  = jsonData.reduce((HTML, img) => {
-                return HTML += `<li class="carousel-item"><img src=${img.src} alt="${img.alt}"></li>`; 
+                return HTML += 
+                    `<li class="carousel-item">
+                        <img src=${img.src} alt="${img.alt}">
+                    </li>`; 
             }, "")
                
-            HTMLEl.innerHTML = carouselHTML.trim();
+            HTMLEl.innerHTML = `<ul class="carousel-wrapper">${carouselHTML}</ul>`.trim();
         }
    },
 
@@ -34,14 +37,15 @@ const template = {
                 HTMLEl.innerHTML = "";
                 return;
             }
+            
             const suggestionHTML  = suggestions.reduce((HTML, suggestion) => {
+                const ref = suggestion.refTag;
                 const fieldKeywords = suggestion.value.split(" ").join("+");
                 const restWord = suggestion.value.replace(prefix, "");
-                const ref = suggestion.refTag;
         
                 return HTML += 
                     `<li class="suggestion-item">
-                        <a class="suggestion-link" href="${URL.ITEMURL}${ref}&${fieldKeywords}&${prefix}">
+                        <a class="suggestion-link" href="${URL.ITEM}ref=${ref}&field-keywords=${fieldKeywords}&prefix=${prefix}">
                             <span class="prefix-highlight">${prefix}</span>${restWord}
                         </a> 
                     </li>`;
