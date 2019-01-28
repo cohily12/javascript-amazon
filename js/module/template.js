@@ -29,9 +29,7 @@ const template = {
         }
    },
 
-    appendSuggestionHTML(selector) {
-        const HTMLEl = $(selector);
-
+    appendSuggestionHTML( HTMLEl ) {
         return ({ prefix, suggestions, error }) => {
             if(error) {
                 HTMLEl.innerHTML = "";
