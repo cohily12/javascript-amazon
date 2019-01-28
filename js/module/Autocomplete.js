@@ -3,40 +3,49 @@ import { $, $All, network, debounce } from "../util.js"
 import { URL } from "../config.js"
 
 class Autocomplete {
-    constructor(target){
+    constructor(target, { keywordsContainer, bDimmer }){
         this.searchEl = $(target);
+        this.keywordsContainer = $(keywordsContainer);
+        if(bDimmer) this.dimmer = this.activeDim("#dimmer");
     }
 
     run(){
         this.searchEl.addEventListener("input", () => { 
-            if(!this.send) this.send = debounce(this.showKeywordsList(".nav-search-autocomplete"), 500);
+            if(!this.debouncer) this.debouncer = debounce(this.showKeywords.bind(this), 500);
+            this.debouncer();
+        })
 
-            this.send();
+        this.searchEl.addEventListener("blur", () => {
+            this.removeKeywords();
+            this.dimmer.off();
         })
     }
 
-    showKeywordsList(containerSelector){
-        const suggestionsWrap = $(containerSelector);
-
+    showKeywords(){
         if(this.searchEl.value === "") {
-            suggestionsWrap.innerHTML = null;
+            this.removeKeywords();
+            this.dimmer.off();
+            return;
         }
-        else {
-            const keywordJson = network.get(`${URL.ACAPI}${this.searchEl.value}`);
-    
-            keywordJson
-                .then(template.appendSuggestionHTML(containerSelector))
-                .then(this.keypressEvent.bind(this))
-                .then(this.activeDim("#dimmer"))
-        }
+        
+        const keywordJson = network.get(`${URL.ACAPI}${this.searchEl.value}`);
+
+        keywordJson
+            .then(template.appendSuggestionHTML(this.keywordsContainer))
+            .then(this.keypressEvent.bind(this))
+            .then(this.dimmer.on)
+    }
+
+    removeKeywords() {
+        this.keywordsContainer.innerHTML = null;
     }
 
     keypressEvent(res) {
         if(!res) return;
 
-        const input = this.searchEl;
-        const suggestions = $All(".suggestion-link");
+        const suggestions = $All(".suggestion-link", this.keywordsContainer);
         const helper = {
+            input: this.searchEl,
             findTarget(){
                 if(currentId < 0) currentId = suggestions.length - 1;
                 if(currentId === suggestions.length) currentId = 0; 
@@ -50,7 +59,7 @@ class Autocomplete {
                 target.classList.remove("hover");
             },
             changeInput() {
-                input.value = json[currentId].value;
+                this.input.value = res[currentId].value;
             }
         }
         let currentId = -1;
@@ -61,32 +70,35 @@ class Autocomplete {
 
                 helper.removeHoverEffect(prevTarget);
                 helper.activeHoverEffect(target);
-                helper.changeInput(target);
+                helper.changeInput();
             }
             else if(evt.keyCode === 40) {
                 const [prevTarget, target] = [helper.findTarget(currentId), helper.findTarget(++currentId)];
 
                 helper.removeHoverEffect(prevTarget);
                 helper.activeHoverEffect(target);
-                helper.changeInput(target);
+                helper.changeInput();
             }
             else if(evt.keyCode === 13) {
                 const target = helper.findTarget(currentId);
+                evt.preventDefault();
                 target.click();
             }
         })
-
-        return res;
     }
 
-    activeDim(bindTo){
+    activeDim(bindTo) {
         const targetEl = $(bindTo);
 
-        return bOn => {
-            if(bOn) targetEl.classList.add("show");
-            else targetEl.classList.remove("show");
+        return {
+            on(){
+                targetEl.classList.add("show");
+            },
+
+            off(){
+                targetEl.classList.remove("show");
+            }
         }
-        
     }
 }
 
