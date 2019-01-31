@@ -1,43 +1,51 @@
-import { $, debounce } from "../util.js"
+import { $, debounce, network } from "../util.js"
+import { createCarouselTemplate, appendTemplate } from "./template.js";
+import { URL } from "../config.js";
 
 class Carousel {
     constructor(bindTo, option){
         this.targetEl = $(bindTo);
-        this.option = option
-        this.playID;
+        this.carouselItems = $(".carousel-items", this.targetEl);
+        this.option = option;
+        this.init();
     }
 
-    run(){
-        const prevBtn = $(this.option.leftBtn);
-        const nextBtn = $(this.option.rightBtn);
+    init() {
+        const prevBtn = $(".carousel-left-arrow", this.targetEl);
+        const nextBtn = $(".carousel-right-arrow", this.targetEl);
+        
+        this.addCarouselDOM();
 
+        window.addEventListener("load", this.autoPlay.bind(this));
+        
         prevBtn.addEventListener("click", () => {
             this.displayPrevCard();
             this.delayAutoPlay();
         });
-
+        
         nextBtn.addEventListener("click", () => {
             this.displayNextCard();
             this.delayAutoPlay();
         });
+    }
 
-        this.autoPlay(this.option.intervalTime);
+    async addCarouselDOM() {
+        const jsonData = await network.get(`${URL.SERVER}json${this.option.itemUrl}`);
+        const carouselTemplate = createCarouselTemplate(jsonData);
+
+        appendTemplate(this.carouselItems, carouselTemplate);
     }
 
     displayNextCard(){
-        const displayEl = $(".carousel-wrapper", this.targetEl);
-
-        displayEl.classList.add("slideRightOn");
-        displayEl.removeEventListener("transitionend", this.slideLeftAnimationEvent);
-        displayEl.addEventListener("transitionend", this.slideRightAnimationEvent);
+        this.carouselItems.removeEventListener("transitionend", this.slideLeftAnimationEvent);
+        this.carouselItems.addEventListener("transitionend", this.slideRightAnimationEvent);
+        this.carouselItems.classList.add("slideRightOn");
     }
 
     displayPrevCard(){
-        const displayEl = $(".carousel-wrapper", this.targetEl);
-
-        displayEl.classList.add("slideLeftOn");
-        displayEl.removeEventListener("transitionend", this.slideRightAnimationEvent);
-        displayEl.addEventListener("transitionend", this.slideLeftAnimationEvent);
+        this.carouselItems.removeEventListener("transitionend", this.slideRightAnimationEvent);
+        this.carouselItems.addEventListener("transitionend", this.slideLeftAnimationEvent);
+        this.carouselItems.classList.add("slideLeftOn");
     }
 
     autoPlay(){
